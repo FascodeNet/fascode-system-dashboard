@@ -1,4 +1,4 @@
-#!/usr/bin.env python3
+#!/usr/bin/env python3
 # Standard Lib
 import sys
 from configparser import ConfigParser
