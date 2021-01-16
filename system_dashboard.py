@@ -31,8 +31,6 @@ try:
     General = config["general"]
 
     INTERVAL = float(General["Interval"])
-
-    print(INTERVAL);
 except:
     print("Config Error")
     sys.exit(1)
@@ -300,7 +298,11 @@ class SystemDashBoardWindow(Gtk.Window):
                 ctx.line_to(0.9,  y)
                 ctx.line_to(0.9, 0.9)
 
-            util.SetRGB(ctx, Color[i])
+            if len(Color) <= i:
+                color_number=i - len(Color)
+            else:
+                color_number=i
+            util.SetRGB(ctx, Color[color_number])
             ctx.fill()
             ctx.stroke()
 
