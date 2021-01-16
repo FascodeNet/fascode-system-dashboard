@@ -1,4 +1,4 @@
-#!/usr/bin.env python3
+#!/usr/bin/env python3
 # Standard Lib
 import sys
 from configparser import ConfigParser
@@ -27,6 +27,10 @@ try:
     DISK =  util.LoadRGB(Color["Disk"])
     NETWORKSENT = util.LoadRGB(Color["NetworkSent"])
     NETWORKRECIVE = util.LoadRGB(Color["NetworkRecive"])
+
+    General = config["general"]
+
+    INTERVAL = float(General["Interval"])
 except:
     print("Config Error")
     sys.exit(1)
@@ -39,7 +43,8 @@ class SystemDashBoardWindow(Gtk.Window):
         self.set_border_width(10)
 
         # Timer
-        GLib.timeout_add_seconds(1, self.update)
+        # GLib.timeout_add_seconds(INTERVAL, self.update)
+        GLib.timeout_add(INTERVAL, self.update)
 
         # CPU
         self.CPUUsage = util.GetCPUUsage(False)
@@ -293,7 +298,11 @@ class SystemDashBoardWindow(Gtk.Window):
                 ctx.line_to(0.9,  y)
                 ctx.line_to(0.9, 0.9)
 
-            util.SetRGB(ctx, Color[i])
+            if len(Color) <= i:
+                color_number=i - len(Color)
+            else:
+                color_number=i
+            util.SetRGB(ctx, Color[color_number])
             ctx.fill()
             ctx.stroke()
 
