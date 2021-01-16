@@ -82,6 +82,13 @@ class SystemDashBoardWindow(Gtk.Window):
         CPUGraph.connect("draw", self.CPUGraphDraw)
         self.Stack.add_titled(CPUGraph, "CPU", "CPU")
 
+        # Memory
+        self.MemoryUsages = [util.GetMemoryUsage()]
+
+        MemoryGraph = Gtk.DrawingArea()
+        MemoryGraph.connect("draw", self.MemoryGraphDraw)
+        self.Stack.add_titled(MemoryGraph, "Memory", "メモリ")
+
         # Finalizing
         HBox = Gtk.HBox()
         HBox.pack_start(self.CPUCircle, True, True, 0)
@@ -103,6 +110,7 @@ class SystemDashBoardWindow(Gtk.Window):
         self.RootUsage = util.GetRootUsage()
         self.NetworkSentSpeed, self.NetworkReciveSpeed = util.GetNetworkSpeed()
         self.CPUUsages.append(util.GetCPUUsage())
+        self.MemoryUsages.append(util.GetMemoryUsage())
 
         if len(self.CPUUsages) > 60:
             self.CPUUsages.pop(0)
@@ -296,6 +304,55 @@ class SystemDashBoardWindow(Gtk.Window):
             util.SetRGB(ctx, Color[i])
             ctx.fill()
             ctx.stroke()
+
+    def MemoryGraphDraw(self, widget, ctx):
+        AllocatedWidth = widget.get_allocated_width()
+        AllocatedHeight = widget.get_allocated_height()
+
+        ctx.scale(AllocatedWidth, AllocatedHeight)
+
+        ctx.set_line_width(0.01)
+
+        # Box
+        ctx.move_to(0.1, 0.1)
+        ctx.line_to(0.1, 0.9)
+        ctx.line_to(0.9, 0.9)
+        ctx.line_to(0.9, 0.1)
+        ctx.line_to(0.1, 0.1)
+        ctx.stroke()
+
+        # Vertical line
+        x = 0.1
+
+        while x < 0.9:
+            ctx.move_to(x, 0.1)
+            ctx.line_to(x, 0.9)
+            ctx.stroke()
+            x += 0.8 / 6
+
+        # Horizontal line
+        y = 0.1
+
+        while y < 0.9:
+            ctx.move_to(0.1, y)
+            ctx.line_to(0.9, y)
+            ctx.stroke()
+            y += 0.8 / 4
+
+        ctx.move_to(0.1 +  0.8 - 0.8 * len(self.MemoryUsages) / 60, 0.9)
+
+        for number, data in enumerate(self.MemoryUsages):
+            x = 0.1 + 0.8 / 60 * number + 0.8 - 0.8 * len(self.MemoryUsages) / 60
+            y = 0.9 - 0.8 * data / 100
+            ctx.line_to(x,  y)
+        else:
+            y = 0.9 - 0.8 * data / 100
+            ctx.line_to(0.9,  y)
+            ctx.line_to(0.9, 0.9)
+
+        util.SetRGB(ctx, MEMORY)
+        ctx.fill()
+        ctx.stroke()
 
 class SystemDashBoard(Gtk.Application):
     def __init__(self):
