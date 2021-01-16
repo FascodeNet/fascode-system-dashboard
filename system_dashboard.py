@@ -27,6 +27,12 @@ try:
     DISK =  util.LoadRGB(Color["Disk"])
     NETWORKSENT = util.LoadRGB(Color["NetworkSent"])
     NETWORKRECIVE = util.LoadRGB(Color["NetworkRecive"])
+
+    General = config["general"]
+
+    INTERVAL = float(General["Interval"])
+
+    print(INTERVAL);
 except:
     print("Config Error")
     sys.exit(1)
@@ -39,7 +45,8 @@ class SystemDashBoardWindow(Gtk.Window):
         self.set_border_width(10)
 
         # Timer
-        GLib.timeout_add_seconds(1, self.update)
+        # GLib.timeout_add_seconds(INTERVAL, self.update)
+        GLib.timeout_add(INTERVAL, self.update)
 
         # CPU
         self.CPUUsage = util.GetCPUUsage(False)
