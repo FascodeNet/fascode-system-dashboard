@@ -82,6 +82,8 @@ class SystemDashBoardWindow(Gtk.Window):
 
         # CPU
         self.CPUUsages = [util.GetCPUUsage()]
+        self.CPUCount = util.GetCPUCount()
+
 
         CPUGraph = Gtk.DrawingArea()
         CPUGraph.connect("draw", self.CPUGraphDraw)
@@ -149,7 +151,8 @@ class SystemDashBoardWindow(Gtk.Window):
         util.ShowText(ctx, 0.45, 0.05, "使用率")
         util.SetRGB(ctx, TEXT)
         util.ShowText(ctx, 0.55, 0.1, f"{self.CPUUsage}%")
-    
+        util.ShowText(ctx, 0.65, 0.1, f"{self.CPUCount}個")
+
     def MemoryCircleDraw(self, widget, ctx):
         AllocatedWidth = widget.get_allocated_width()
         AllocatedHeight = widget.get_allocated_height()
@@ -294,15 +297,15 @@ class SystemDashBoardWindow(Gtk.Window):
             ctx.stroke()
             y += 0.8 / 4
 
-        for i in reversed(range(util.GetCPUCount())):
+        for i in reversed(range(self.CPUCount)):
             ctx.move_to(0.1 +  0.8 - 0.8 * len(self.CPUUsages) / 60, 0.9)
             
             for number, data in enumerate(self.CPUUsages):
                 x = 0.1 + 0.8 / 60 * number + 0.8 - 0.8 * len(self.CPUUsages) / 60
-                y = 0.9 - 0.8 * (sum(data[:i + 1]) / util.GetCPUCount()) / 100
+                y = 0.9 - 0.8 * (sum(data[:i + 1]) / self.CPUCount) / 100
                 ctx.line_to(x,  y)
             else:
-                y = 0.9 - 0.8 * (sum(data[:i + 1]) / util.GetCPUCount()) / 100
+                y = 0.9 - 0.8 * (sum(data[:i + 1]) / self.CPUCount) / 100
                 ctx.line_to(0.9,  y)
                 ctx.line_to(0.9, 0.9)
 
