@@ -2,6 +2,7 @@
 # Standard Lib
 import sys
 from configparser import ConfigParser
+from itertools import product
 from math import ceil, pi
 
 # Local Lib
@@ -31,6 +32,7 @@ try:
     General = config["general"]
 
     INTERVAL = float(General["Interval"])
+    MAX = int(General["Max"])
 except:
     print("Config Error")
     sys.exit(1)
@@ -117,8 +119,9 @@ class SystemDashBoardWindow(Gtk.Window):
         self.CPUUsages.append(util.GetCPUUsage())
         self.MemoryUsages.append(util.GetMemoryUsage())
 
-        if len(self.CPUUsages) > 60:
+        if len(self.CPUUsages) > MAX:
             self.CPUUsages.pop(0)
+            self.MemoryUsages.pop(0)
 
         self.CPUCircle.queue_draw()
         self.MemoryCircle.queue_draw()
@@ -126,7 +129,7 @@ class SystemDashBoardWindow(Gtk.Window):
         self.Stack.get_visible_child().queue_draw()
 
         return True
-    
+
     def CPUCircleDraw(self, widget, ctx):
         AllocatedWidth = widget.get_allocated_width()
         AllocatedHeight = widget.get_allocated_height()
@@ -183,7 +186,7 @@ class SystemDashBoardWindow(Gtk.Window):
         util.ShowText(ctx, 0.4, 0.1, f"{self.MemoryUsage}%")
         util.ShowText(ctx, 0.6, 0.1, self.MemoryUsed)
         util.ShowText(ctx, 0.7, 0.1, self.MemoryTotal)
-    
+
     def RootCircleDraw(self, widget, ctx):
         AllocatedWidth = widget.get_allocated_width()
         AllocatedHeight = widget.get_allocated_height()
@@ -224,7 +227,7 @@ class SystemDashBoardWindow(Gtk.Window):
         util.SetRGB(ctx, TEXT)
         util.ShowText(ctx, 0.6, 0.15, self.RootUsage["used"])
         util.ShowText(ctx, 0.8, 0.15, self.RootUsage["total"])
-    
+
     def NetworkCircleDraw(self, widget, ctx):
         AllocatedWidth = widget.get_allocated_width()
         AllocatedHeight = widget.get_allocated_height()
@@ -254,11 +257,12 @@ class SystemDashBoardWindow(Gtk.Window):
         util.ShowText(ctx, 0.95, 0.2,  self.NetworkReciveSpeed)
     
     def CPUGraphDraw(self, widget, ctx):
+        CPUCount = util.GetCPUCount()
+        Stage = ceil(CPUCount ** (1/3))
+
         Color = [
-            [63, 81, 181],
-            [0, 188, 212],
-            [233, 30, 99],
-            [139, 195, 74]
+            [r * 255 / Stage, g * 255 / Stage, b * 255 / Stage]
+            for r, g, b in product(range(Stage), range(Stage), range(Stage))
         ]
 
         AllocatedWidth = widget.get_allocated_width()
@@ -267,23 +271,6 @@ class SystemDashBoardWindow(Gtk.Window):
         ctx.scale(AllocatedWidth, AllocatedHeight)
 
         ctx.set_line_width(0.01)
-
-        # Box
-        ctx.move_to(0.1, 0.1)
-        ctx.line_to(0.1, 0.9)
-        ctx.line_to(0.9, 0.9)
-        ctx.line_to(0.9, 0.1)
-        ctx.line_to(0.1, 0.1)
-        ctx.stroke()
-
-        # Vertical line
-        x = 0.1
-
-        while x < 0.9:
-            ctx.move_to(x, 0.1)
-            ctx.line_to(x, 0.9)
-            ctx.stroke()
-            x += 0.8 / 6
 
         # Horizontal line
         y = 0.1
@@ -294,23 +281,19 @@ class SystemDashBoardWindow(Gtk.Window):
             ctx.stroke()
             y += 0.8 / 4
 
-        for i in reversed(range(util.GetCPUCount())):
-            ctx.move_to(0.1 +  0.8 - 0.8 * len(self.CPUUsages) / 60, 0.9)
-            
+        for i in reversed(range(CPUCount)):
+            ctx.move_to(0.1 +  0.8 - 0.8 * len(self.CPUUsages) / MAX, 0.9)
+
             for number, data in enumerate(self.CPUUsages):
-                x = 0.1 + 0.8 / 60 * number + 0.8 - 0.8 * len(self.CPUUsages) / 60
-                y = 0.9 - 0.8 * (sum(data[:i + 1]) / util.GetCPUCount()) / 100
+                x = 0.1 + 0.8 / MAX * number + 0.8 - 0.8 * len(self.CPUUsages) / MAX
+                y = 0.9 - 0.8 * (sum(data[:i + 1]) / CPUCount) / 100
                 ctx.line_to(x,  y)
             else:
-                y = 0.9 - 0.8 * (sum(data[:i + 1]) / util.GetCPUCount()) / 100
+                y = 0.9 - 0.8 * (sum(data[:i + 1]) / CPUCount) / 100
                 ctx.line_to(0.9,  y)
                 ctx.line_to(0.9, 0.9)
 
-            if len(Color) <= i:
-                color_number=i - len(Color)
-            else:
-                color_number=i
-            util.SetRGB(ctx, Color[color_number])
+            util.SetRGB(ctx, Color[i])
             ctx.fill()
             ctx.stroke()
 
@@ -322,23 +305,6 @@ class SystemDashBoardWindow(Gtk.Window):
 
         ctx.set_line_width(0.01)
 
-        # Box
-        ctx.move_to(0.1, 0.1)
-        ctx.line_to(0.1, 0.9)
-        ctx.line_to(0.9, 0.9)
-        ctx.line_to(0.9, 0.1)
-        ctx.line_to(0.1, 0.1)
-        ctx.stroke()
-
-        # Vertical line
-        x = 0.1
-
-        while x < 0.9:
-            ctx.move_to(x, 0.1)
-            ctx.line_to(x, 0.9)
-            ctx.stroke()
-            x += 0.8 / 6
-
         # Horizontal line
         y = 0.1
 
@@ -348,10 +314,10 @@ class SystemDashBoardWindow(Gtk.Window):
             ctx.stroke()
             y += 0.8 / 4
 
-        ctx.move_to(0.1 +  0.8 - 0.8 * len(self.MemoryUsages) / 60, 0.9)
+        ctx.move_to(0.1 +  0.8 - 0.8 * len(self.MemoryUsages) / MAX, 0.9)
 
         for number, data in enumerate(self.MemoryUsages):
-            x = 0.1 + 0.8 / 60 * number + 0.8 - 0.8 * len(self.MemoryUsages) / 60
+            x = 0.1 + 0.8 / MAX * number + 0.8 - 0.8 * len(self.MemoryUsages) / MAX
             y = 0.9 - 0.8 * data / 100
             ctx.line_to(x,  y)
         else:
