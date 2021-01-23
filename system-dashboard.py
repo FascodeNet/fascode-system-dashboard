@@ -16,7 +16,7 @@ gi.require_version("Gtk", "3.0")
 from gi.repository import Gio, GLib, Gtk
 
 config = ConfigParser()
-config.read("system_dashboard.conf")
+config.read("/etc/system-dashboard.conf")
 
 try:
     Color = config["color"]
