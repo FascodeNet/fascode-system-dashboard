@@ -1,9 +1,0 @@
-[Desktop Entry]
-Name=Fascode System Dashboard
-Comment=GUI system monitor written in Python
-Categories=GTK;System;Monitor;
-Exec=fascode-system-dashboard
-Terminal=false
-StartupNotify=true
-Type=Application
-Keywords=Monitor;System;Process;CPU;Memory;Network;History;Usage;Performance;Task;Manager;

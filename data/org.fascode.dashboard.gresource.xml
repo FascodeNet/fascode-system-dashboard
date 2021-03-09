@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gresources>
+    <gresource prefix="/org/fascode/dashboard">
+        <file preprocess="xml-stripblanks">ui/about-dialog.ui</file>
+        <file preprocess="xml-stripblanks">ui/disk-speed.ui</file>
+        <file preprocess="xml-stripblanks">ui/net-speed.ui</file>
+        <file preprocess="xml-stripblanks">ui/swap-box.ui</file>
+        <file preprocess="xml-stripblanks">ui/window.ui</file>
+    </gresource>
+</gresources>
