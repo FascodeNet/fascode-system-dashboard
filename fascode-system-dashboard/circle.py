@@ -11,53 +11,44 @@ import gi
 gi.require_version("Gtk", "3.0")
 
 from cairo import Context, LINE_CAP_ROUND
-from gi.repository import Gtk
+from gi.repository import Gtk, Gdk
 
 
-class Circle(Gtk.AspectFrame):
+class Circle(Gtk.DrawingArea):
     def __init__(
         self,
         color: str,
         track_color: str,
-        line_width: float = 0.02,
         size: float = 2 * pi,
-        start: float = 0
+        start: float = 0,
     ):
-        super().__init__(obey_child=True)
-        self.set_shadow_type(Gtk.ShadowType.NONE)
-
-        self.circle = Gtk.DrawingArea()
-        self.circle.connect("draw", self._draw)
-        self.add(self.circle)
+        super().__init__()
 
         self.progress = 0.0
         self.color = color
         self.track_color = track_color
-        self.line_width = line_width
         self.size = size
         self.start = start
 
     def set_progress(self, progress: float):
         self.progress = progress
-        self.circle.queue_draw()
+        self.queue_draw()
 
-    def _draw(self, widget: Gtk.Widget, ctx: Context):
-        allocated_width = widget.get_allocated_width()
-        allocated_height = widget.get_allocated_height()
-        width = allocated_width if allocated_width < allocated_height else allocated_height
+    def do_draw(self, ctx: Context):
+        allocation = self.get_allocation()
+        width = allocation.width / 2 if allocation.width < allocation.height else allocation.height / 2
 
-        ctx.scale(width, width)
-        ctx.set_line_width(self.line_width)
+        ctx.set_line_width(width / 10)
         ctx.set_line_cap(LINE_CAP_ROUND)
 
         point = self.size * (self.progress / 100) + self.start
         end = self.size + self.start
 
-        ctx.arc(0.5, 0.5, 0.4, point, end)
+        ctx.arc(allocation.width / 2, allocation.height / 2, width * 0.9, point, end)
         set_rgb(ctx, self.track_color)
         ctx.stroke()
 
-        ctx.arc(0.5, 0.5, 0.4, self.start, point)
+        ctx.arc(allocation.width / 2, allocation.height / 2, width * 0.9, self.start, point)
         set_rgb(ctx, self.color)
         ctx.stroke()
 

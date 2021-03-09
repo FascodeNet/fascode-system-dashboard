@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 # Third-Party Library
+import gi
+
+from gi.repository import Gdk
 from cairo import Context
 
 
-def set_rgb(ctx: Context, rgb: str, alpha: int = 100):
-    rgb = rgb.strip("#")
-    r = int(rgb[0:2], 16)
-    g = int(rgb[2:4], 16)
-    b = int(rgb[4:6], 16)
-
-    ctx.set_source_rgba(r / 255, g / 255, b / 255, alpha / 100)
+def set_rgb(ctx: Context, color: str):
+    rgba = Gdk.RGBA()
+    rgba.parse(color)
+    ctx.set_source_rgba(rgba.red, rgba.green, rgba.blue, rgba.alpha)
